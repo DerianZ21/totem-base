@@ -1,6 +1,13 @@
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
+
+  /* Modificar ftamaño de fuente base por cada proyecto 16px por defecto */
+  /* General */
+  font-size: clamp(16px, 2vw, 30px);
+  /* Cambiar */
+  /* font-size: 16px; */
+
   font-weight: 400;
 
   color-scheme: light dark;

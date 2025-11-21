@@ -1,0 +1,40 @@
+.button {
+  transition: all 0.2s ease;
+  border: none;
+  outline: none;
+}
+
+/* cuando el botón recibe focus */
+.button:focus {
+  border: none;
+  outline: none;
+}
+
+/* cuando haces click */
+.button:active {
+  background-color: #ff2600 !important;
+  border: none;
+  outline: none;
+}
+
+/* Primary */
+.primary {
+  background-color: #eb472a;
+  color: #ffffff;
+}
+
+.primary:hover {
+  background-color: #ffffff;
+  color: #eb472a;
+}
+
+/* Secondary */
+.secondary {
+  background-color: #ffffff;
+  color: #eb472a;
+}
+
+.secondary:hover {
+  background-color: #eb472a;
+  color: #ffffff;
+}

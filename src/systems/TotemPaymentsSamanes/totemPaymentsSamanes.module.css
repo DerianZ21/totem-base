@@ -1,0 +1,7 @@
+.branding {
+  width: 7rem;
+  position: fixed;
+  bottom: 2rem;
+  right: calc(2rem);
+  opacity: 0.5;
+}

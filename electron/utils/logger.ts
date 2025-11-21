@@ -1,6 +1,6 @@
 import { app } from "electron";
 import fs from "fs";
-import path from "path";
+import path from 'node:path'
 
 const LOG_FILE = path.join(app.getPath("userData"), "pinlet.log");
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -38,7 +38,7 @@ function write(level: string, msg: string, meta?: unknown) {
     ensureLogDir();
     rotateIfNeeded();
     const time = new Date().toISOString();
-    const entry: Record<string, any> = { time, level, message: msg };
+    const entry: Record<string, unknown> = { time, level, message: msg };
     if (meta) entry.meta = meta;
     const line = JSON.stringify(entry) + "\n";
     fs.appendFileSync(LOG_FILE, line);

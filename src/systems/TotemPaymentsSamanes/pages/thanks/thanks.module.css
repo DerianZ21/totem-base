@@ -1,0 +1,17 @@
+.main_thanks {
+  background-color: #eb472a;
+  background-image: url("../../assets/thanks.gif");
+  background-size: cover; /* Hace que la imagen cubra todo */
+  background-position: center; /* Centra la imagen */
+  background-repeat: no-repeat; /* Evita repeticiones */
+  min-height: calc(100vh);
+  width: 100vw;
+  max-width: 70rem;
+  display: flex;
+  flex-direction: column;
+  /* gap: 15px; */
+  /* gap: calc(100vw - 52%); */
+  gap: 6.7rem;
+  justify-content: center;
+  align-items: center;
+}

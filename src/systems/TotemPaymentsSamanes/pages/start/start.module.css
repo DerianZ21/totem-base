@@ -1,0 +1,61 @@
+.main_start {
+  background-image: url("../../assets/background1.webp");
+  background-size: cover; /* Hace que la imagen cubra todo */
+  background-position: center; /* Centra la imagen */
+  background-repeat: no-repeat; /* Evita repeticiones */
+  min-height: calc(100vh);
+  width: 100%;
+  max-width: 70rem;
+  display: flex;
+  flex-direction: column;
+  /* gap: 15px; */
+  /* gap: calc(100vw - 52%); */
+  gap: 6.7rem;
+  justify-content: center;
+  align-items: center;
+  color: #f3f5f9;
+}
+
+.main_start p,
+.main_start h1 {
+  margin: 0;
+}
+
+.branding_img {
+  /* width: 400px; */
+  /* width: calc(100vw - 45%); */
+  width: 26rem;
+}
+
+.txt {
+  display: flex;
+  flex-direction: column;
+}
+
+.txt .welcome_txt {
+  font-size: 3rem;
+}
+
+.txt .message_txt {
+  font-size: 2.2rem;
+  width: 80%;
+  margin: 0 auto;
+}
+
+.qr_img {
+  /* width: 100px; */
+  /* width: calc(100vw - 80%); */
+  width: 10rem;
+}
+
+.btnAction {
+  width: 65%;
+  font-size: 1.7rem;
+  padding: 0.5rem 0;
+}
+
+.btnActionGetData {
+  width: 100%;
+  font-size: 1.7rem;
+  padding: 0.5rem 0;
+}

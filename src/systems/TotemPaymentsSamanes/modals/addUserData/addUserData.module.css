@@ -1,0 +1,49 @@
+.main_add_user_data {
+  background-image: url("./assets/background1.webp");
+  background-size: cover; /* Hace que la imagen cubra todo */
+  background-position: center; /* Centra la imagen */
+  background-repeat: no-repeat; /* Evita repeticiones */
+  height: calc(100% - 8rem); /* Restar el pading de altura*/
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+  padding: 4rem 0;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+.main_add_user_data .tittle {
+  color: #f3f5f9;
+  background-color: #eb472a;
+  font-size: 2rem;
+  text-align: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  width: 75%;
+  margin: 0 auto;
+}
+
+.branding_img {
+  width: 20rem;
+  margin: 0 auto;
+}
+
+.main_add_user_data .field_tittle {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #3e4852;
+}
+
+.actions{
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.btnAction{
+  font-size: 1.5rem;
+  width: calc(50% - 1rem);
+  box-shadow: 1px 0.2rem 0.5rem #3e485211;
+}

@@ -1,0 +1,48 @@
+.main_paying {
+  /* Ruta */
+  /* background-color: #f3f5f9;
+  height: 100vh;
+  width: 100vw;
+  max-width: 55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+
+  /* Modal */
+  width: calc(100% - 8rem);
+  height: calc(100% - 8rem);
+  padding: 4rem;
+  max-width: 55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+  border-radius: 0.5rem;
+}
+
+.main_paying p {
+  margin: 0;
+}
+
+.txt {
+  border: 0.1rem solid #eb472a;
+  border-radius: 4.5rem;
+  padding: 0.5rem 5rem;
+  max-width: 60%;
+}
+
+.txt .message_txt {
+  font-size: 2rem;
+  color: #3e4852;
+  font-weight: 100;
+  line-height: 1.2;
+}
+
+.card_img {
+  /* width: 400px; */
+  /* width: calc(100vw - 60%); */
+  width: 10rem;
+}
