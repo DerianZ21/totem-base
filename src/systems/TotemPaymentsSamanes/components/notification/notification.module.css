@@ -1,0 +1,30 @@
+.main_notification {
+  height: 100%;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  color: #3e4852;
+  text-align: center;
+  padding: 1.5rem;
+  gap: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+.tittle,
+.message {
+  margin: 0;
+}
+
+.tittle {
+  font-size: 2rem;
+}
+
+.message {
+  font-size: 1.5rem;
+}
+
+.icon {
+  width: 4rem;
+}

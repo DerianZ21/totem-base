@@ -25,9 +25,20 @@ export const openCashRegister = <TPayload = unknown>(payload: TPayload) => {
 // Buscar ingreso a parque
 export const getParking = <TPayload = unknown>(payload: TPayload) => {
   return httpRequest<Parqueo, TPayload>({
-    endpoint: `${WebEnvConfig.apiUrl}/lectorParqueo`,
+    endpoint: `${WebEnvConfig.apiUrlPinlet}/lectorParqueo`,
     method: "POST",
     useCache: false,
     payload: payload,
+  });
+};
+
+// Buscar ingreso a parque
+export const validateParking = <TPayload = unknown>(payload: TPayload) => {
+  return httpRequest<Parqueo, TPayload>({
+    endpoint: `${WebEnvConfig.apiUrlPinlet}/validarParqueoRegistro `,
+    method: "POST",
+    useCache: false,
+    payload: payload,
+    apikey: WebEnvConfig.token,
   });
 };

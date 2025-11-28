@@ -2,29 +2,49 @@ import { useNavigate } from "react-router-dom";
 import styles from "./start.module.css";
 import qr from "../../assets/qr.svg";
 import branding from "../../assets/branding.svg";
+import load from "../../assets/load/load_bar_long.svg";
 import {
   ButtonPrimary,
   ButtonSecondary,
 } from "../../components/buttons/Button";
-import { TextField, Modal, Box } from "@mui/material";
+import { TextField, Dialog } from "@mui/material";
 import { useGetParking } from "../../hooks/useBilling";
 import { useEffect, useState, useCallback } from "react";
 import { WebEnvConfig } from "../../config/env";
+import Notification from "../../components/notification/Notification";
+import { StatusNotification } from "../../models/notification/Notification";
 
 const Start: React.FC = () => {
   const [code, setCode] = useState<string>("");
-  const {
-    dataParkingEntry,
-    loadinGetParking,
-    errorloadinGetParking,
-    obtenerIngreso,
-  } = useGetParking();
+  const [openNotificationDetail, setOpenNotificationDetail] =
+    useState<boolean>(false);
+  const [notificationDetail, setNotificationDetail] = useState<{
+    tittle: string;
+    message: string;
+    status: StatusNotification;
+  }>({ tittle: "", message: "", status: "info" });
 
   const [openInput, setOpenInput] = useState<boolean>(false);
+
+  const {
+    dataGetParking,
+    loadingGetParking,
+    errorGetParking,
+    obtenerIngreso,
+  } = useGetParking();
 
   const navigate = useNavigate();
 
   const getParkingData = async () => {
+    if (code.trim() === "") {
+      setOpenNotificationDetail(true);
+      setNotificationDetail({
+        status: "error",
+        tittle: "Error de código",
+        message: "No ha ingresado ningún código",
+      });
+      return;
+    }
     const payload = {
       codigo: code,
       id_lugar: WebEnvConfig.idPlace,
@@ -36,22 +56,51 @@ const Start: React.FC = () => {
 
   const goToPayment = useCallback(() => {
     navigate("/totemPaymentsSamanes/payment", {
-      state: { data: dataParkingEntry },
+      state: { data: dataGetParking },
     });
-  }, [navigate, dataParkingEntry]);
+  }, [navigate, dataGetParking]);
 
   useEffect(() => {
-    setOpenInput(false)
-    if (
-      dataParkingEntry &&
-      !loadinGetParking &&
-      errorloadinGetParking === null
-    ) {
+    if (dataGetParking && !loadingGetParking && errorGetParking === null) {
       goToPayment();
+      setOpenInput(false);
     }
-  }, [dataParkingEntry, loadinGetParking, errorloadinGetParking, goToPayment]);
+  }, [dataGetParking, loadingGetParking, errorGetParking, goToPayment]);
 
-  if (loadinGetParking) return <p>Consultando datos</p>;
+  useEffect(() => {
+    if (errorGetParking) {
+      if (typeof errorGetParking === "string") {
+        const message = String(errorGetParking);
+        if (message.includes("NETWORK_ERROR")) {
+          setNotificationDetail({
+            status: "error",
+            tittle: "Error de conexión",
+            message: "Sin conexión a Internet o red inestable.",
+          });
+        } else if (message.includes("SERVICE_ERROR")) {
+          setNotificationDetail({
+            status: "error",
+            tittle: "Servicio no disponible",
+            message: "El sistema está temporalmente fuera de servicio.",
+          });
+        } else {
+          setNotificationDetail({
+            status: "error",
+            tittle: "Error inesperado",
+            message: "Ocurrió un error desconocido. Intente nuevamente.",
+          });
+        }
+      } else {
+        setNotificationDetail({
+          status: "error",
+          tittle: "Error de código",
+          message: "Código de parqueo inválido",
+        });
+      }
+
+      setOpenNotificationDetail(true);
+    }
+  }, [errorGetParking]);
 
   return (
     <>
@@ -65,9 +114,7 @@ const Start: React.FC = () => {
           </p>
         </div>
         <img className={styles.qr_img} src={qr} />
-        {errorloadinGetParking !== null && (
-          <p style={{ color: "red" }}>Error de código</p>
-        )}
+
         <ButtonSecondary
           className={styles.btnAction}
           label="Ingresar código"
@@ -76,29 +123,21 @@ const Start: React.FC = () => {
         />
       </div>
 
-      <Modal
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
+      <Dialog
         open={openInput}
-        onClose={() => setOpenInput(false)}
+        onClose={() => {
+          setOpenInput(false), setCode("");
+        }}
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: "transparent",
+              boxShadow: "none",
+            },
+          },
+        }}
       >
-        <Box
-          sx={{
-            maxWidth: "55rem",
-            maxHeight: "70rem",
-            overflowY: "auto",
-            overflowX: "hidden",
-            backgroundColor: "#eb472a",
-            borderRadius: "0.5rem",
-            padding: "1rem",
-            display: "flex",
-            flexDirection: "column",
-            gap: "1rem",
-          }}
-        >
+        <div className={styles.input_code}>
           <TextField
             value={code}
             onChange={(e) => setCode(e.target.value)}
@@ -109,8 +148,9 @@ const Start: React.FC = () => {
                 borderRadius: "0.5rem",
                 boxShadow: "1px 0.2rem 0.5rem #3e485211",
                 fontFamily: "Inter, Roboto, sans-serif", // ← fuente del input
-                fontSize: "1rem",
+                fontSize: "2rem",
                 fontWeight: "bolder",
+                color: "#3e4852",
               },
               "& .MuiOutlinedInput-input": {
                 textAlign: "center",
@@ -130,14 +170,29 @@ const Start: React.FC = () => {
               },
             }}
           />
-          <ButtonPrimary
-            className={styles.btnActionGetData}
-            label="Aceptar"
-            key={1}
-            onClick={() => getParkingData()}
-          />
-        </Box>
-      </Modal>
+          {loadingGetParking ? (
+            <div className={styles.load}>
+              <img className={styles.load_animation} src={load} />
+            </div>
+          ) : (
+            <ButtonPrimary
+              className={styles.btnActionGetData}
+              label="Aceptar"
+              key={1}
+              onClick={() => getParkingData()}
+            />
+          )}
+        </div>
+      </Dialog>
+      <Notification
+        tittle={notificationDetail.tittle}
+        message={notificationDetail.message}
+        status={notificationDetail.status}
+        open={openNotificationDetail}
+        key={"notification"}
+        close={() => setOpenNotificationDetail(false)}
+        closeTime={10000000}
+      />
     </>
   );
 };

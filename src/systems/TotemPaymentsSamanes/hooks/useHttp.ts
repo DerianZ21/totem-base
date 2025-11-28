@@ -27,8 +27,11 @@ export function useHttp<TResponse, TPayload = unknown>(
 
       return result.data;
     } catch (err: unknown) {
-      setError(err);
-      console.error(err);
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError(String(err));
+      }
     } finally {
       setLoading(false);
     }

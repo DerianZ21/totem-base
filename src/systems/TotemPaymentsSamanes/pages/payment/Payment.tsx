@@ -16,7 +16,7 @@ import { Parqueo } from "../../models/parqueo/parqueo.model";
 
 const Payment: React.FC = () => {
   const location = useLocation();
-  const data = location.state?.data as Parqueo | undefined;
+  const data = location.state.data as Parqueo;
 
   // inhibir salva pantallas
   useEffect(() => {
@@ -253,7 +253,7 @@ const Payment: React.FC = () => {
             borderRadius: "0.5rem",
           }}
         >
-          <Paying
+          <Paying dataParking={data} 
           // close={()=>setOpenPayinModal(false)}
           />
         </Box>

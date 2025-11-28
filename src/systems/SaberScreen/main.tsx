@@ -3,13 +3,17 @@ import { CircularProgress } from "@mui/material";
 
 import video_example1 from "../../assets/test/Burger(vertical).mp4";
 import video_example2 from "../../assets/test/sleep(vertical).mp4";
+import video_example3 from "../../assets/test/food(horizontal).mp4";
+import video_example4 from "../../assets/test/food(vertical).mp4";
 import image_example1 from "../../assets/test/moda(vertical_img).jpg";
 
 // Definición de la lista de reproducción
 const playlist = [
   { type: "video", src: video_example1, duration: 15000 }, // Duración del video: 15 segundos (15000ms)
   { type: "image", src: image_example1, duration: 10000 }, // Duración de la imagen: 10 segundos (10000ms)
+  { type: "video", src: video_example3, duration: 15000 },
   { type: "video", src: video_example2, duration: 15000 },
+  { type: "video", src: video_example4, duration: 15000 },
 ];
 
 const Main: React.FC = () => {
@@ -38,9 +42,9 @@ const Main: React.FC = () => {
   useEffect(() => {
     let timeout: NodeJS.Timeout | null = null;
     const videoElement = videoRef.current;
-    
+
     // Al cambiar de asset, reseteamos el tiempo de inicio
-    setStartTime(Date.now()); 
+    setStartTime(Date.now());
     setProgress(0); // Reiniciamos el progreso visual
 
     if (currentAsset.type === "video" && videoElement) {
@@ -86,13 +90,14 @@ const Main: React.FC = () => {
         const videoDuration = videoElement.duration * 1000; // Duración en milisegundos
 
         if (videoDuration > 0) {
-          currentProgress = (videoElement.currentTime * 1000 / videoDuration) * 100;
+          currentProgress =
+            ((videoElement.currentTime * 1000) / videoDuration) * 100;
         }
       } else {
         // Para imágenes (y si el video aún no tiene metadatos cargados), usamos el elapsed time
         currentProgress = (elapsed / totalDuration) * 100;
       }
-      
+
       // El progreso nunca debe superar el 100%
       setProgress(Math.min(currentProgress, 100));
 
@@ -104,34 +109,34 @@ const Main: React.FC = () => {
   }, [currentAssetIndex, startTime, totalDuration]);
 
   return (
-    <div 
-        style={{ 
-            width: "100vw", 
-            height: "100vh", 
-            overflow: "hidden", 
-            backgroundColor: "#000",
-            position: "relative", // Importante para posicionar el progreso
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center'
-        }}
+    <div
+      style={{
+        width: "100vw",
+        height: "100vh",
+        overflow: "hidden",
+        backgroundColor: "#000",
+        position: "relative", // Importante para posicionar el progreso
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
     >
       {/* ⭐ COMPONENTE DE PROGRESO - Posicionado en la esquina o centro ⭐ */}
-      <CircularProgress 
-        variant="determinate" 
-        value={progress} 
-        size={60} 
+      <CircularProgress
+        variant="determinate"
+        value={progress}
+        size={60}
         thickness={5}
         style={{
-          color: '#f59580ff',
-          position: 'absolute',
+          color: "#f59580ff",
+          position: "absolute",
           top: 20, // Distancia desde el borde superior
           right: 20, // Distancia desde el borde derecho
           zIndex: 10, // Asegura que esté por encima del video/imagen
-          border: "#FF5733"
+          border: "#FF5733",
         }}
       />
-      
+
       {/* Renderizado condicional del Asset */}
       {currentAsset.type === "video" ? (
         <video

@@ -25,18 +25,24 @@ export async function httpRequest<TResponse, TPayload = unknown>(
   const cacheKey = generateCacheKey(req);
 
   if (useCache && cache[cacheKey]) {
-    return { ok: true, status: 200, data: cache[cacheKey] as TResponse  };
+    return { ok: true, status: 200, data: cache[cacheKey] as TResponse };
   }
 
   try {
+    console.log(payload instanceof FormData);
+    const isFormData = payload instanceof FormData;
     const response = await fetch(url, {
       method,
       headers: {
         Authorization: `Bearer ${apikey}`,
-        "Content-Type": "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
         ...headers,
       },
-      body: payload ? JSON.stringify(payload) : undefined,
+      body: isFormData
+        ? payload
+        : payload
+        ? JSON.stringify(payload)
+        : undefined,
     });
 
     const buffer = await response.arrayBuffer();
@@ -58,7 +64,13 @@ export async function httpRequest<TResponse, TPayload = unknown>(
       data,
     };
   } catch (err: unknown) {
-    console.error("Error en httpRequest:", err);
-    throw err;
+    // ERROR DE RED
+    const msg = (err as Error)?.message ?? "";
+    if (msg.includes("Failed to fetch")) {
+      throw new Error("NETWORK_ERROR");
+    }
+
+    // ERROR DE SERVICIO
+    throw new Error("SERVICE_ERROR");
   }
 }

@@ -8,6 +8,7 @@ import SaverScreenManager from "./screems/saverScreen";
 import ConfigScreenManager from "./screems/configScreen";
 import ScreenManager from "./screenManager";
 import logger from "./utils/logger";
+import { getAuthHeaderCredential } from "./systems/totemPaymentsSamanes";
 
 dotenv.config();
 
@@ -49,7 +50,7 @@ process.env.VITE_PUBLIC = VITE_DEV_SERVER_URL
 //   logger.error(`Promesa no manejada: ${reason}`);
 // });
 
-app.whenReady().then( async () => {
+app.whenReady().then(async () => {
   // Instancia Clase Pantalla de configuración
   configScreen = new ConfigScreenManager();
   configScreen.init();
@@ -131,7 +132,9 @@ ipcMain.on("totem:uninhibitSaver", () => {
   }
 });
 
-
+ipcMain.handle("data-fast:credential", () => {
+  return getAuthHeaderCredential();
+});
 
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits

@@ -10,6 +10,7 @@ declare global {
       inhibitSaverScreen: () => viod;
       uninhibitSaverScreen: () => viod;
       stopSaverScreem: () => void;
+      getCredential: () => Promise<string>;
 
       // agrega aquí otras funciones que expongas en preload
       send: (channel: string, ...args: unknown[]) => void;

@@ -3,6 +3,7 @@ import {
   getCashRegister,
   openCashRegister,
   getParking,
+  validateParking,
 } from "../services/billing.service";
 import { CajaFacturacion } from "../models/caja/caja.model";
 import { Parqueo } from "../models/parqueo/parqueo.model";
@@ -44,9 +45,24 @@ export function useGetParking<TPayload = unknown>() {
   const obtenerIngreso = (payload: TPayload) => execute(payload);
 
   return {
-    dataParkingEntry: data,
-    loadinGetParking: loading,
-    errorloadinGetParking: error,
+    dataGetParking: data,
+    loadingGetParking: loading,
+    errorGetParking: error,
     obtenerIngreso,
+  };
+}
+
+export function useValidateParking<TPayload = unknown>() {
+  const { data, loading, error, execute } = useHttp<Parqueo, TPayload>(
+    validateParking
+  );
+
+  const validarParqueo = (payload: TPayload) => execute(payload);
+
+  return {
+    dataValidateParking: data,
+    loadingValidateParking: loading,
+    errorValidateParking: error,
+    validarParqueo,
   };
 }

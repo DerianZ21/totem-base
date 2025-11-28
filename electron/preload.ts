@@ -29,6 +29,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   inhibitSaverScreen: () => ipcRenderer.send("totem:inhibitSaver"),
   uninhibitSaverScreen: () => ipcRenderer.send("totem:uninhibitSaver"),
   stopSaverScreem: () => ipcRenderer.send("totem:stopSaver"),
+  
+
+  // Metodos de datafast
+  getCredential: () => ipcRenderer.invoke("data-fast:credential"),
+
 
   // Metodos genéricos
   on(...args: Parameters<typeof ipcRenderer.on>) {
