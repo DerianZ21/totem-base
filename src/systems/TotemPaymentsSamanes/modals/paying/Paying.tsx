@@ -29,14 +29,6 @@ const Paying: React.FC<PayingProps> = ({ dataParking }) => {
   }>({ tittle: "", message: "", status: "info" });
 
   // Hooks personalizados
-  // Validar Parqueo (Pago)
-  const {
-    dataValidateParking,
-    loadingValidateParking,
-    errorValidateParking,
-    validarParqueo,
-  } = useValidateParking();
-
   // Obtener estado del servidor con conexión al dataFast
   const {
     dataDFServiceStatus,
@@ -53,50 +45,15 @@ const Paying: React.FC<PayingProps> = ({ dataParking }) => {
     executeDFPayProcess,
   } = useDFPayProcess();
 
-  // Efectos
-  //Consulta estado del servicio dataFast al cargar el componente
-  useEffect(() => {
-    executeGetDFServiceStatus();
-  }, [executeGetDFServiceStatus]);
+  // Validar Parqueo (Pago)
+  const {
+    dataValidateParking,
+    loadingValidateParking,
+    errorValidateParking,
+    validarParqueo,
+  } = useValidateParking();
 
-  // Si la consuta es ok, proceder a realizar el pago
-  useEffect(() => {
-    if (loadingDFServiceStatus) return;
-    if (errorDFServiceStatus) {
-      setNotificationDetail({
-        status: "error",
-        tittle: "Error de conexión",
-        message: "No se pudo verificar el estado del servicio de pago.",
-      });
-      setOpenNotificationDetail(true);
-      return;
-    }
-    if (dataDFServiceStatus !== "OK") {
-      setNotificationDetail({
-        status: "error",
-        tittle: "Servicio de pago no disponible",
-        message: "El sistema de pago está temporalmente fuera de servicio.",
-      });
-      setOpenNotificationDetail(true);
-      return;
-    }
-    // Si está OK → validar parqueo
-    const payload = {
-      base0: "0.00",
-      baseImponible: "8.00",
-      iva: "0.96",
-      total: "8.96",
-      referenciaInterna: "PARQUEO-PLACA-PBQ1234",
-      servicioId: 15,
-    };
-    executeDFPayProcess(payload);
-  }, [
-    dataDFServiceStatus,
-    loadingDFServiceStatus,
-    errorDFServiceStatus,
-    executeDFPayProcess,
-  ]);
-
+  // Funciones
   const validateParking = useCallback(() => {
     const form = new FormData();
     form.append("id_ingreso", String(dataParking.id_ingreso));
@@ -113,18 +70,26 @@ const Paying: React.FC<PayingProps> = ({ dataParking }) => {
     validarParqueo(form);
   }, [dataParking, validarParqueo]);
 
+  // Efectos
+  // Consulta estado del servicio dataFast al cargar el componente
   useEffect(() => {
-    if (!dataDFPayProcess && !errorDFPayProcess) return;
-    if (errorDFPayProcess) {
+    executeGetDFServiceStatus();
+  }, [executeGetDFServiceStatus]);
+
+  // Si la consuta es ok, proceder a realizar el pago
+  useEffect(() => {
+    if (loadingDFServiceStatus) return;
+    if (errorDFServiceStatus) {
       setNotificationDetail({
         status: "error",
-        tittle: "Error de pago",
-        message: "No se pudo procesar el pago con DataFast.",
+        tittle: "Error de sistema de pago",
+        message: "Servicio de pago no disponible",
       });
       setOpenNotificationDetail(true);
       return;
     }
-    if (dataDFPayProcess && dataDFPayProcess.data.CodigoRespuesta !== "00") {
+    if(!dataDFServiceStatus) return
+    if (dataDFServiceStatus !== "OK") {
       setNotificationDetail({
         status: "error",
         tittle: "Servicio de pago no disponible",
@@ -133,15 +98,62 @@ const Paying: React.FC<PayingProps> = ({ dataParking }) => {
       setOpenNotificationDetail(true);
       return;
     }
-    validateParking();
-  }, [dataDFPayProcess, errorDFPayProcess, validateParking]);
+    // Si está OK → Realiza proceso de pago
+    const payload = {
+      base0: "0.00",
+      baseImponible: "8.00",
+      iva: "0.96",
+      total: "8.96",
+      referenciaInterna: "PARQUEO-PLACA-PBQ1234",
+      servicioId: 15,
+    };
+    executeDFPayProcess(payload);
+  }, [
+    dataDFServiceStatus,
+    loadingDFServiceStatus,
+    errorDFServiceStatus,
+    executeDFPayProcess,
+  ]);
 
   useEffect(() => {
+    if (loadingDFPayProcess) return;
+    if (errorDFPayProcess) {
+      setNotificationDetail({
+        status: "error",
+        tittle: "Error de sistema",
+        message: "Sistema interno de pago no disponible",
+      });
+      setOpenNotificationDetail(true);
+      return;
+    }
+    if (!dataDFPayProcess) return
+    if (dataDFPayProcess.data.CodigoRespuesta !== "00") {
+      setNotificationDetail({
+        status: "error",
+        tittle: "Proceso de oago fallido",
+        // Completar con parametros de respuesta dataDFPayProcess.data...
+        message: "Pago no realizado - detalle: ...",
+      });
+      setOpenNotificationDetail(true);
+      return;
+    }
+    validateParking();
+  }, [
+    dataDFPayProcess,
+    loadingDFPayProcess,
+    errorDFPayProcess,
+    validateParking,
+  ]);
+
+  useEffect(() => {
+    if (loadingValidateParking) return;
+    // Completar con repuesta al consultar registro de pago Pinlet
     if (!dataValidateParking) return;
+    console.log("Respuesta validación parqueo:", dataValidateParking);
+    navigate("/totemPaymentsSamanes/start");
+  }, [dataValidateParking, loadingValidateParking, navigate]);
 
-    navigate("/pago/start");
-  }, [dataValidateParking, navigate]);
-
+  // Única consula que requiere internet - valida errer por fallas de red o el fallas en el microsevicio.
   useEffect(() => {
     if (errorValidateParking) {
       if (typeof errorValidateParking === "string") {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { HttpResponse } from "../models/http.model";
 
 export function useHttp<TResponse, TPayload = unknown>(
@@ -8,7 +8,7 @@ export function useHttp<TResponse, TPayload = unknown>(
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<unknown>(null);
 
-  const execute = async (payload: TPayload) => {
+  const execute = useCallback( async (payload: TPayload) => {
     setLoading(true);
     setError(null);
 
@@ -35,7 +35,7 @@ export function useHttp<TResponse, TPayload = unknown>(
     } finally {
       setLoading(false);
     }
-  };
+  },[requestFn]);
 
   return { data, loading, error, execute };
 }

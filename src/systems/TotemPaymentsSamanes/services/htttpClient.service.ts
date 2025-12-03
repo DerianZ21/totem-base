@@ -29,7 +29,6 @@ export async function httpRequest<TResponse, TPayload = unknown>(
   }
 
   try {
-    console.log(payload instanceof FormData);
     const isFormData = payload instanceof FormData;
     const response = await fetch(url, {
       method,

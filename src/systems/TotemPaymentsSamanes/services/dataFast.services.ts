@@ -10,7 +10,7 @@ export const getStatus = async () => {
     credential = await window.electronAPI.getCredential();
   }
 
-  return httpRequest<unknown>({
+  return httpRequest<string>({
     endpoint: `${WebEnvConfig.apiUrlDataFast}/status`,
     method: "GET",
     headers: {
