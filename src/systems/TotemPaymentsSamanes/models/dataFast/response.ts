@@ -1,4 +1,8 @@
 // Corregir
+export interface DataFastResponseStatus {
+  status: string;
+}
+
 export interface DataFastResponse {
   success: boolean;
   data: dataResponse;

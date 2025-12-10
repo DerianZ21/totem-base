@@ -1,6 +1,6 @@
 import { httpRequest } from "../services/htttpClient.service";
 import { WebEnvConfig } from "../config/env";
-import { DataFastResponse } from "../models/dataFast/response";
+import { DataFastResponse, DataFastResponseStatus } from "../models/dataFast/response";
 
 // Obtener status del servicio de datafast
 export const getStatus = async () => {
@@ -10,13 +10,13 @@ export const getStatus = async () => {
     credential = await window.electronAPI.getCredential();
   }
 
-  return httpRequest<string>({
+  return httpRequest<DataFastResponseStatus>({
     endpoint: `${WebEnvConfig.apiUrlDataFast}/status`,
     method: "GET",
     headers: {
       "TOTEM-PINLET-AUTH": credential,
     },
-    useCache: true,
+    useCache: false,
   });
 };
 
@@ -34,6 +34,6 @@ export const payProcess = async <TPayload = unknown>(payload: TPayload) => {
       "TOTEM-PINLET-AUTH": credential,
     },
     payload: payload,
-    useCache: true,
+    useCache: false,
   });
 };

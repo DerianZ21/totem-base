@@ -1,6 +1,6 @@
 import { httpRequest } from "../services/htttpClient.service";
 import { CajaFacturacion } from "../models/caja/caja.model";
-import { Parqueo } from "../models/parqueo/parqueo.model";
+import { Parqueo, ResponseValidate } from "../models/parqueo/parqueo.model";
 import { WebEnvConfig } from "../config/env";
 
 // Obtener Las cajas disponibles
@@ -13,7 +13,7 @@ export const getCashRegister = () => {
 };
 
 // Abrir caja
-export const openCashRegister = <TPayload = unknown>(payload: TPayload) => {
+export const openCashRegister = <TPayload>(payload: TPayload) => {
   return httpRequest<CajaFacturacion[], TPayload>({
     endpoint: `${WebEnvConfig.apiUrlfacturation}/caja-apertura`,
     method: "POST",
@@ -23,7 +23,7 @@ export const openCashRegister = <TPayload = unknown>(payload: TPayload) => {
 };
 
 // Buscar ingreso a parque
-export const getParking = <TPayload = unknown>(payload: TPayload) => {
+export const getParking = <TPayload>(payload: TPayload) => {
   return httpRequest<Parqueo, TPayload>({
     endpoint: `${WebEnvConfig.apiUrlPinlet}/lectorParqueo`,
     method: "POST",
@@ -33,8 +33,8 @@ export const getParking = <TPayload = unknown>(payload: TPayload) => {
 };
 
 // Buscar ingreso a parque
-export const validateParking = <TPayload = unknown>(payload: TPayload) => {
-  return httpRequest<Parqueo, TPayload>({
+export const validateParking = <TPayload>(payload: TPayload) => {
+  return httpRequest<ResponseValidate, TPayload>({
     endpoint: `${WebEnvConfig.apiUrlPinlet}/validarParqueoRegistro `,
     method: "POST",
     useCache: false,

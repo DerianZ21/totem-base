@@ -6,7 +6,7 @@ import {
   validateParking,
 } from "../services/billing.service";
 import { CajaFacturacion } from "../models/caja/caja.model";
-import { Parqueo } from "../models/parqueo/parqueo.model";
+import { Parqueo, ResponseValidate } from "../models/parqueo/parqueo.model";
 
 export function useGetCashRegister() {
   const { data, loading, error, execute } = useHttp<CajaFacturacion[], void>(
@@ -21,7 +21,7 @@ export function useGetCashRegister() {
   };
 }
 
-export function useOpenCashRegister<TPayload = unknown>() {
+export function useOpenCashRegister<TPayload>() {
   const { data, loading, error, execute } = useHttp<
     CajaFacturacion[],
     TPayload
@@ -37,32 +37,35 @@ export function useOpenCashRegister<TPayload = unknown>() {
   };
 }
 
-export function useGetParking<TPayload = unknown>() {
-  const { data, loading, error, execute } = useHttp<Parqueo, TPayload>(
+export function useGetParking<TPayload>() {
+  const { data, loading, error, execute, reset } = useHttp<Parqueo, TPayload>(
     getParking
   );
 
-  const obtenerIngreso = (payload: TPayload) => execute(payload);
+  const executeGetIngreso = (payload: TPayload) => execute(payload);
 
   return {
     dataGetParking: data,
     loadingGetParking: loading,
     errorGetParking: error,
-    obtenerIngreso,
+    executeGetIngreso,
+    resetGetParking: reset
+
   };
 }
 
-export function useValidateParking<TPayload = unknown>() {
-  const { data, loading, error, execute } = useHttp<Parqueo, TPayload>(
+export function useValidateParking<TPayload>() {
+  const { data, loading, error, execute, reset } = useHttp<ResponseValidate, TPayload>(
     validateParking
   );
 
-  const validarParqueo = (payload: TPayload) => execute(payload);
+  const executeValidateParqueo = (payload: TPayload) => execute(payload);
 
   return {
     dataValidateParking: data,
     loadingValidateParking: loading,
     errorValidateParking: error,
-    validarParqueo,
+    executeValidateParqueo,
+    resetValidateParqueo: reset
   };
 }

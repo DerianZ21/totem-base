@@ -30,19 +30,19 @@ const Start: React.FC = () => {
     dataGetParking,
     loadingGetParking,
     errorGetParking,
-    obtenerIngreso,
+    executeGetIngreso,
   } = useGetParking();
 
   const navigate = useNavigate();
 
   const getParkingData = async () => {
     if (code.trim() === "") {
-      setOpenNotificationDetail(true);
       setNotificationDetail({
         status: "error",
         tittle: "Error de código",
         message: "No ha ingresado ningún código",
       });
+      setOpenNotificationDetail(true);
       return;
     }
     const payload = {
@@ -51,7 +51,7 @@ const Start: React.FC = () => {
       id_usuario_admin: "196",
       tipo_ingreso: "V",
     };
-    await obtenerIngreso(payload);
+    await executeGetIngreso(payload);
   };
 
   const goToPayment = useCallback(() => {
@@ -69,35 +69,31 @@ const Start: React.FC = () => {
 
   useEffect(() => {
     if (errorGetParking) {
-      if (typeof errorGetParking === "string") {
-        const message = String(errorGetParking);
-        if (message.includes("NETWORK_ERROR")) {
-          setNotificationDetail({
-            status: "error",
-            tittle: "Error de conexión",
-            message: "Sin conexión a Internet o red inestable.",
-          });
-        } else if (message.includes("SERVICE_ERROR")) {
-          setNotificationDetail({
-            status: "error",
-            tittle: "Servicio no disponible",
-            message: "El sistema está temporalmente fuera de servicio.",
-          });
-        } else {
-          setNotificationDetail({
-            status: "error",
-            tittle: "Error inesperado",
-            message: "Ocurrió un error desconocido. Intente nuevamente.",
-          });
-        }
-      } else {
+      if (errorGetParking.message === "NETWORK_ERROR") {
+        setNotificationDetail({
+          status: "error",
+          tittle: "Error de conexión",
+          message: "Sin conexión a Internet o red inestable.",
+        });
+      } else if (errorGetParking.message === "SERVICE_DOWN") {
+        setNotificationDetail({
+          status: "error",
+          tittle: "Servicio no disponible",
+          message: "El sistema está temporalmente fuera de servicio.",
+        });
+      } else if (errorGetParking.message === "BAD_REQUEST") {
         setNotificationDetail({
           status: "error",
           tittle: "Error de código",
           message: "Código de parqueo inválido",
         });
+      } else {
+        setNotificationDetail({
+          status: "error",
+          tittle: "Error inesperado",
+          message: "Ocurrió un error desconocido. Intente nuevamente.",
+        });
       }
-
       setOpenNotificationDetail(true);
     }
   }, [errorGetParking]);

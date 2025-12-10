@@ -43,7 +43,6 @@ const Payment: React.FC = () => {
       const images = data?.ingreso.img_ingreso.split(",");
       setImages(images);
     }
-    
   }, [data?.ingreso.img_ingreso]);
 
   if (!data) {
@@ -73,7 +72,9 @@ const Payment: React.FC = () => {
                 </div>
                 <div className={styles.info_in_txt}>
                   <p className={styles.param_tittle}>Puerta de ingreso</p>
-                  <p className={styles.param}>{data.ingreso.nombre_puerta_ingreso}</p>
+                  <p className={styles.param}>
+                    {data.ingreso.nombre_puerta_ingreso}
+                  </p>
                 </div>
                 <div className={styles.info_in_txt}>
                   <p className={styles.param_tittle}>Tipo de ingreso</p>
@@ -239,7 +240,7 @@ const Payment: React.FC = () => {
           alignItems: "center",
         }}
         open={openPayingModal}
-        onClose={() => setOpenPayinModal(false)}
+        // onClose={() => setOpenPayinModal(false)}
       >
         <Box
           sx={{
@@ -253,9 +254,7 @@ const Payment: React.FC = () => {
             borderRadius: "0.5rem",
           }}
         >
-          <Paying dataParking={data} 
-          // close={()=>setOpenPayinModal(false)}
-          />
+          <Paying dataParking={data} close={() => setOpenPayinModal(false)} />
         </Box>
       </Modal>
       <Modal

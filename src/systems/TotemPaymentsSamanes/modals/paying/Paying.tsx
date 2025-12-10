@@ -1,9 +1,12 @@
 import styles from "./paying.module.css";
-import card from "../../assets/pay_card_animated.svg";
+import card_load from "../../assets/pay_card_animated.svg";
+import load from "../../assets/load/load_spin.svg";
+import icon_success from "../../assets/success.svg";
+import icon_error from "../../assets/error.svg";
+import icon_warn from "../../assets/warn.svg";
 import { useNavigate } from "react-router-dom";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useValidateParking } from "../../hooks/useBilling";
-import Notification from "../../components/notification/Notification";
 import { StatusNotification } from "../../models/notification/Notification";
 import { WebEnvConfig } from "../../config/env";
 import { Parqueo } from "../../models/parqueo/parqueo.model";
@@ -14,47 +17,85 @@ import {
 
 interface PayingProps {
   dataParking: Parqueo;
+  close: () => void;
 }
 const Paying: React.FC<PayingProps> = ({ dataParking }) => {
   // Hooks nativos
   const navigate = useNavigate();
 
   // Estados
-  const [openNotificationDetail, setOpenNotificationDetail] =
-    useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(true);
   const [notificationDetail, setNotificationDetail] = useState<{
     tittle: string;
     message: string;
     status: StatusNotification;
-  }>({ tittle: "", message: "", status: "info" });
+  }>({ tittle: "en proceso...", message: "en proceso...", status: "info" });
 
   // Hooks personalizados
   // Obtener estado del servidor con conexión al dataFast
   const {
-    dataDFServiceStatus,
-    loadingDFServiceStatus,
     errorDFServiceStatus,
     executeGetDFServiceStatus,
+    resetDFServiceStatus,
   } = useGetDFServiceStatus();
 
   // Realiazar proceso de pago con dataFast
   const {
-    dataDFPayProcess,
     loadingDFPayProcess,
     errorDFPayProcess,
     executeDFPayProcess,
+    resetDFPayProcess,
   } = useDFPayProcess();
 
   // Validar Parqueo (Pago)
   const {
-    dataValidateParking,
-    loadingValidateParking,
     errorValidateParking,
-    validarParqueo,
+    executeValidateParqueo,
+    resetValidateParqueo,
   } = useValidateParking();
 
-  // Funciones
-  const validateParking = useCallback(() => {
+  // FUNTIONS
+
+  const validateStatusDFServices = async (): Promise<boolean> => {
+    const dataDFServiceStatus = await executeGetDFServiceStatus();
+    if (!dataDFServiceStatus) return false;
+    if (dataDFServiceStatus.status !== "OK") {
+      setNotificationDetail({
+        status: "error",
+        tittle: "Error de sistema de pago",
+        message: "Servicio de pago no disponible",
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validatePayProcess = async (): Promise<boolean> => {
+    // Cambiar los valores quemados
+    const payload = {
+      base0: "0.00",
+      baseImponible: "1.00",
+      iva: "0.15",
+      total: "1.15",
+      referenciaInterna: "PARQUEO-PLACA-PBQ1234",
+      servicioId: 15,
+    };
+
+    const dataDFPayProcess = await executeDFPayProcess(payload);
+    if (!dataDFPayProcess) return false;
+    if (!dataDFPayProcess.data) return false;
+    if (dataDFPayProcess.data.CodigoRespuesta !== "00") {
+      setNotificationDetail({
+        status: "error",
+        tittle: "Proceso de pago fallido",
+        message: `Pago no realizado - detalle: ${dataDFPayProcess.data.MensajeRespuestaAut}`,
+      });
+      return false;
+    }
+    return true;
+  };
+
+  const validatePayRegister = async (): Promise<boolean> => {
     const form = new FormData();
     form.append("id_ingreso", String(dataParking.id_ingreso));
     form.append("id_lugar", String(WebEnvConfig.idPlace));
@@ -66,148 +107,160 @@ const Paying: React.FC<PayingProps> = ({ dataParking }) => {
     form.append("estado", dataParking.estado);
     form.append("placa", dataParking.placa);
     form.append("especial", "N");
-
-    validarParqueo(form);
-  }, [dataParking, validarParqueo]);
-
-  // Efectos
-  // Consulta estado del servicio dataFast al cargar el componente
-  useEffect(() => {
-    executeGetDFServiceStatus();
-  }, [executeGetDFServiceStatus]);
-
-  // Si la consuta es ok, proceder a realizar el pago
-  useEffect(() => {
-    if (loadingDFServiceStatus) return;
-    if (errorDFServiceStatus) {
+    const dataValidateParking = await executeValidateParqueo(form);
+    if (!dataValidateParking) return false;
+    if (dataValidateParking.status !== "Se verificó correctamente") {
       setNotificationDetail({
         status: "error",
-        tittle: "Error de sistema de pago",
-        message: "Servicio de pago no disponible",
+        tittle: "Error en Registro de Parqueo",
+        message: "Error al registrar la validación del pago",
       });
-      setOpenNotificationDetail(true);
-      return;
+      return false;
     }
-    if(!dataDFServiceStatus) return
-    if (dataDFServiceStatus !== "OK") {
+    return true;
+  };
+
+  const errorProcess = ({
+    error,
+    tittle,
+    message,
+  }: {
+    error: string;
+    tittle: string;
+    message: string;
+  }) => {
+    if (error === "NETWORK_ERROR") {
       setNotificationDetail({
         status: "error",
-        tittle: "Servicio de pago no disponible",
-        message: "El sistema de pago está temporalmente fuera de servicio.",
+        tittle: "Error de conexión",
+        message: "Sin conexión a Internet o red inestable",
       });
-      setOpenNotificationDetail(true);
-      return;
-    }
-    // Si está OK → Realiza proceso de pago
-    const payload = {
-      base0: "0.00",
-      baseImponible: "8.00",
-      iva: "0.96",
-      total: "8.96",
-      referenciaInterna: "PARQUEO-PLACA-PBQ1234",
-      servicioId: 15,
-    };
-    executeDFPayProcess(payload);
-  }, [
-    dataDFServiceStatus,
-    loadingDFServiceStatus,
-    errorDFServiceStatus,
-    executeDFPayProcess,
-  ]);
-
-  useEffect(() => {
-    if (loadingDFPayProcess) return;
-    if (errorDFPayProcess) {
+    } else if (error === "SERVICE_DOWN") {
       setNotificationDetail({
         status: "error",
-        tittle: "Error de sistema",
-        message: "Sistema interno de pago no disponible",
+        tittle: "Error de servicio",
+        message: "Servicio no disponible",
       });
-      setOpenNotificationDetail(true);
-      return;
-    }
-    if (!dataDFPayProcess) return
-    if (dataDFPayProcess.data.CodigoRespuesta !== "00") {
+    } else if (error === "BAD_REQUEST") {
       setNotificationDetail({
         status: "error",
-        tittle: "Proceso de oago fallido",
-        // Completar con parametros de respuesta dataDFPayProcess.data...
-        message: "Pago no realizado - detalle: ...",
+        tittle: tittle,
+        message: message,
       });
-      setOpenNotificationDetail(true);
-      return;
+    } else {
+      setNotificationDetail({
+        status: "error",
+        tittle: "Error inesperado",
+        message: "Ocurrió un error desconocido. Intente nuevamente.",
+      });
     }
-    validateParking();
-  }, [
-    dataDFPayProcess,
-    loadingDFPayProcess,
-    errorDFPayProcess,
-    validateParking,
-  ]);
+  };
 
-  useEffect(() => {
-    if (loadingValidateParking) return;
-    // Completar con repuesta al consultar registro de pago Pinlet
-    if (!dataValidateParking) return;
-    console.log("Respuesta validación parqueo:", dataValidateParking);
-    navigate("/totemPaymentsSamanes/start");
-  }, [dataValidateParking, loadingValidateParking, navigate]);
-
-  // Única consula que requiere internet - valida errer por fallas de red o el fallas en el microsevicio.
-  useEffect(() => {
-    if (errorValidateParking) {
-      if (typeof errorValidateParking === "string") {
-        const message = String(errorValidateParking);
-        if (message.includes("NETWORK_ERROR")) {
-          setNotificationDetail({
-            status: "error",
-            tittle: "Error de conexión",
-            message: "Sin conexión a Internet o red inestable.",
-          });
-        } else if (message.includes("SERVICE_ERROR")) {
-          setNotificationDetail({
-            status: "error",
-            tittle: "Servicio no disponible",
-            message: "El sistema está temporalmente fuera de servicio.",
-          });
-        } else {
-          setNotificationDetail({
-            status: "error",
-            tittle: "Error inesperado",
-            message: "Ocurrió un error desconocido. Intente nuevamente.",
-          });
-        }
-      } else {
-        setNotificationDetail({
-          status: "error",
-          tittle: "Error de validación",
-          message: "---",
-        });
+  // MAIN PROCESS
+  const payProcessComplete = async () => {
+    try {
+      // Verificaión, servicio local en funcionamiento
+      const statusDFService: boolean = await validateStatusDFServices();
+      if (!statusDFService) {
+        return;
       }
 
-      setOpenNotificationDetail(true);
+      // Verificaión, proceso de pago
+      const payProcess: boolean = await validatePayProcess();
+      if (!payProcess) {
+        setLoading(false);
+        return;
+      }
+
+      // Verificaión, registro de pago de parqueo
+      const payRegister: boolean = await validatePayRegister();
+      setLoading(false);
+      if (!payRegister) {
+        return;
+      }
+      setNotificationDetail({
+        status: "success",
+        tittle: "Transacción realizada exitosamente",
+        message: "Transacción realizada exitosamente",
+      });
+    } catch (error) {
+      setNotificationDetail({
+        status: "error",
+        tittle: "Error inesperado",
+        message: "Intente nuevamente",
+      });
+    } finally {
+      setTimeout(() => {
+        resetValidateParqueo();
+        resetDFServiceStatus();
+        resetDFPayProcess();
+        // close();
+        navigate("/totemPaymentsSamanes/start");
+      }, 5000);
     }
-  }, [errorValidateParking]);
+  };
+
+  // MAIN EFFECT
+  useEffect(() => {
+    payProcessComplete();
+  }, []);
+
+  useEffect(() => {
+    if (errorDFServiceStatus) {
+      errorProcess({
+        error: errorDFServiceStatus.message,
+        tittle: "Error de servicio",
+        message: "Servicio no disponible",
+      });
+    }
+
+    if (errorDFPayProcess) {
+      errorProcess({
+        error: errorDFPayProcess.message,
+        tittle: "Error de transacción",
+        message:
+          errorDFPayProcess.detalle?.data.message || "Error de transacción",
+      });
+    }
+
+    if (errorValidateParking) {
+      errorProcess({
+        error: errorValidateParking.message,
+        tittle: "Error de registro",
+        message: "Error de registro",
+      });
+    }
+  }, [errorDFServiceStatus, errorDFPayProcess, errorValidateParking]);
 
   return (
     <>
       <div className={styles.main_paying}>
-        <div className={styles.txt}>
-          <p className={styles.message_txt}>
-            Coloque su tarjeta para procesar el pago
-          </p>
-        </div>
-        <img className={styles.card_img} src={card} />
+        {loading ? (
+          <>
+            <div className={styles.txt}>
+              <p className={styles.message_txt}>
+                {loadingDFPayProcess
+                  ? "Coloque su tarjeta para procesar el pago"
+                  : "Procesando"}
+              </p>
+            </div>
+            <img
+              className={styles.card_img}
+              src={loadingDFPayProcess ? card_load : load}
+            />
+          </>
+        ) : (
+          <>
+            <div className={styles.txt}>
+              <p className={styles.message_txt}>{notificationDetail.message}</p>
+            </div>
+            <img
+              className={styles.card_img}
+              src={notificationDetail.status === "success" ? icon_success : notificationDetail.status === "error" ?  icon_error : icon_warn}
+            />
+          </>
+        )}
       </div>
-      <Notification
-        tittle={notificationDetail.tittle}
-        message={notificationDetail.message}
-        status={notificationDetail.status}
-        open={openNotificationDetail}
-        key={"notification"}
-        close={() => setOpenNotificationDetail(false)}
-        closeTime={10000000}
-      />
     </>
   );
 };

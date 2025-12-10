@@ -63,13 +63,30 @@ export async function httpRequest<TResponse, TPayload = unknown>(
       data,
     };
   } catch (err: unknown) {
-    // ERROR DE RED
-    const msg = (err as Error)?.message ?? "";
-    if (msg.includes("Failed to fetch")) {
-      throw new Error("NETWORK_ERROR");
-    }
+    const online = await checkInternet();
 
-    // ERROR DE SERVICIO
-    throw new Error("SERVICE_ERROR");
+    if (!online) {
+      throw new Error("NETWORK_ERROR"); // Sin internet
+    }
+    throw new Error("SERVICE_DOWN"); // Servidor DataFast caído, DNS, firewall, etc.
+  }
+}
+
+async function checkInternet(): Promise<boolean> {
+  try {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), 3000);
+
+    // Consulta de endpoint para conexión a internet
+    await fetch("https://www.gstatic.com/generate_204", {
+      method: "GET",
+      mode: "no-cors",
+      signal: controller.signal,
+    });
+
+    clearTimeout(id);
+    return true;
+  } catch {
+    return false;
   }
 }

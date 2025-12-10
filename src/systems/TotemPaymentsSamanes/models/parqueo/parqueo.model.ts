@@ -18,3 +18,7 @@ export interface Ingreso {
   img_ingreso: string;
   img_ingreso_array: string[];
 }
+
+export interface ResponseValidate{
+  status: string;
+}

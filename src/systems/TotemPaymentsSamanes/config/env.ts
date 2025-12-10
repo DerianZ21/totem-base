@@ -6,3 +6,15 @@ export const WebEnvConfig = {
   idPlace: 90,
   idCashRegister: 12,
 } as const;
+
+
+// export const DataFastaConectParams = {
+//   ip: "192.168.50.72",
+//   port: 9999,
+//   timeout: 30000,
+//   MID: "MID123456",
+//   TID: "TID987654",
+//   idCaja: "TOTEM01",
+//   version: 2,
+//   SHA: 2
+// } as const;

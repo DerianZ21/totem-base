@@ -1,14 +1,19 @@
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { HttpResponse } from "../models/http.model";
 
-export function useHttp<TResponse, TPayload = unknown>(
+export function useHttp<TResponse, TPayload>(
   requestFn: (params: TPayload) => Promise<HttpResponse<TResponse>>
 ) {
   const [data, setData] = useState<TResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<unknown>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<{
+    message: string;
+    request: (params: TPayload) => Promise<HttpResponse<TResponse>>;
+    payload: TPayload;
+    detalle?: HttpResponse<TResponse>;
+  } | null>(null);
 
-  const execute = useCallback( async (payload: TPayload) => {
+  const execute = async (payload: TPayload) => {
     setLoading(true);
     setError(null);
 
@@ -18,7 +23,7 @@ export function useHttp<TResponse, TPayload = unknown>(
 
       if (result.status !== 200) {
         setError({
-          message: "Error en consulta",
+          message: "BAD_REQUEST",
           request: requestFn,
           payload: payload,
           detalle: result,
@@ -28,14 +33,29 @@ export function useHttp<TResponse, TPayload = unknown>(
       return result.data;
     } catch (err: unknown) {
       if (err instanceof Error) {
-        setError(err.message);
+        setError({
+          message: err.message,
+          request: requestFn,
+          payload: payload,
+        });
       } else {
-        setError(String(err));
+        console.log("aqui: no: "+String(err));
+        setError({
+          message: String(err),
+          request: requestFn,
+          payload: payload,
+        });
       }
     } finally {
       setLoading(false);
     }
-  },[requestFn]);
+  };
 
-  return { data, loading, error, execute };
+  const reset = () => {
+    setData(null);
+    setLoading(false);
+    setError(null);
+  };
+
+  return { data, loading, error, execute, reset };
 }

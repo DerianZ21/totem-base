@@ -13,7 +13,6 @@ const Thanks = () => {
         alert("No se puede desinahibitar el salva pantallas (API no disponible)");
       }
     };
-
     uninhibitSaverScreen();
   }, []);
 
